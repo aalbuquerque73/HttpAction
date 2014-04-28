@@ -5,15 +5,16 @@
 <link rel="stylesheet" href="css/main.css" />
 
 <script data-main="js/main.js" src="js/lib/require-2.1.11.js"></script>
+
 </head>
 
 <body>
 	<div id="content">
 		<div class="panel">
 			<div class="pane" data-bind="ui">
-				<input id="url" type="text" data-bind="value: url, ui: {expand:true}" />
-				<button data-bind="click: post" disabled="disabled">Post</button>
-				<button data-bind="click: get" disabled="disabled">Get</button>
+				<input id="url" type="text" data-bind="value: url, ui: {expand:true}, valueUpdate: 'afterkeydown'" />
+				<button data-bind="click: post, attachTo: { obj:url, act:'enable' }" disabled="disabled">Post</button>
+				<button data-bind="click: get, attachTo: { obj:url, act:'enable' }" disabled="disabled">Get</button>
 			</div>
 			<div class="pane" data-bind="ui">
 				<textarea data-bind="data.request, ui: {expand:true}"></textarea>

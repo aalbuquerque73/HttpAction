@@ -1,5 +1,5 @@
-define(['jquery','underscore','knockout','utils','list'],
-function($,_,ko,U, List) {
+define(['jquery','underscore','knockout','utils'],
+function($,_,ko,U) {
 	console.log("[App] Setting up UI bidings...");
 	ko.bindingHandlers.ui = {
 		init: function(element, valueAccessor, allBindings, viewModel, context) {
@@ -48,21 +48,80 @@ function($,_,ko,U, List) {
 		},
 		update: function(element, valueAccessor, allBindings, viewModel, context) {}
 	};
+	ko.bindingHandlers.attachTo = {
+		init: function(element, valueAccessor, allBindings, viewModel, context) {
+			console.log("[attachTo:init]", arguments);
+			console.log("[attachTo:init]", valueAccessor());
+			console.log("[attachTo:init]", viewModel.url===valueAccessor);
+			console.log("[attachTo:init]", viewModel.url===valueAccessor());
+			var actions = {
+				enable: function() {
+					$(element).removeAttr("disabled");
+				},
+				disable: function() {
+					$(element).attr("disabled", "disabled");
+				}
+			};
+			var opts = valueAccessor();
+			opts.obj.subscribe(function() {
+				console.log("[attachTo:init] subscribe", arguments);
+				if (actions.hasOwnProperty(opts.act)) {
+					actions[opts.act]();
+				}
+			});
+		},
+		update: function(element, valueAccessor, allBindings, viewModel, context) {}
+	};
 	
 	function MainViewModel() {
+		var self = this;
 		this.url = ko.observable();
 		this.data = {
 			request: ko.observable(),
 			response: ko.observable()
 		};
+		
+		this.url.subscribe(function(newValue) {
+			console.log("[Model:url:subscribe]", arguments, this, self);
+		});
 	}
 	MainViewModel.prototype = {
 		start: function() {
 			ko.applyBindings(this);
 		},
 		
-		post: function() {},
-		get: function() {}
+		post: function() {
+			var self = this;
+			var options = {
+				type: "POST",
+				urL: self.url(),
+				data: self.data.request(),
+				success: function(data, status) {
+					console.log("[post:ajax]", arguments);
+					if ("success" === status) {
+						console.log("[get:ajax", status);
+						self.data.response(data);
+					}
+				}
+			};
+			console.log("[post:ajax]", arguments, options, self);
+			$.ajax(options);
+		},
+		get: function() {
+			var self = this;
+			console.log("[get:ajax]", arguments, self);
+			var options = {
+				urL: self.url(),
+				success: function(data, status) {
+					console.log("[get:ajax]", arguments);
+					if ("success" === status) {
+						console.log("[get:ajax", status);
+						self.data.response(data);
+					}
+				}
+			};
+			$.ajax(options);
+		}
 	};
 	
 	return new MainViewModel();
